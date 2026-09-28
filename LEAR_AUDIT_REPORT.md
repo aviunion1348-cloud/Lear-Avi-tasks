@@ -1150,3 +1150,25 @@ See the exact inventory below; the list is intentionally path-oriented so any fi
 ./tests/test_widget_generation.py
 ./tf_test_dir/main.tf
 ./uv.lock
+
+---
+
+## 16. Deep line-level system-design context
+
+The owner requested a second completeness pass so a future implementation agent can understand the system before changing it. The companion artifact [`LEAR_FULL_SYSTEM_CONTEXT.md`](./LEAR_FULL_SYSTEM_CONTEXT.md) is the exhaustive source map for that purpose.
+
+This pass is deliberately more mechanical than the narrative audit:
+
+- It enumerates every tracked file in the checkout, including documentation, specifications, tests, fixtures, scripts, infrastructure, lockfiles, desktop assets, and the audit artifacts.
+- For every UTF-8 text file it records byte size, SHA-256, total line count, structural symbols with exact start/end line ranges, detected routes/hooks/actions/network/process/persistence markers, and then emits every source line with its original 1-based line number.
+- For binary files it records the path, byte size, SHA-256, and binary classification instead of inventing semantic source details.
+- It distinguishes implementation, test, fixture, task/specification, documentation, configuration, generated-lock, script, infrastructure, and asset areas so future changes can be scoped against both code and the intended contract.
+- Credential-looking fixture values are redacted in the companion context while key names, control flow, tests, and file/line locations remain visible. No live credential or provider call was used.
+
+The line-level context is not a substitute for the repository itself: before any change, the implementation agent must still re-open the exact current source lines and re-check the working tree. The context is a navigation and completeness contract, not permission to assume that prose, task status, or tests are correct.
+
+### Completeness status
+
+- Product implementation was not changed by this audit.
+- The context generator scans the current tracked-file set and reports its own excluded self-reference explicitly; the final tracked-file count is recorded in the context header.
+- Any future code change invalidates the affected line ranges and hashes; regenerate the context after such a change.
