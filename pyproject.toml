@@ -43,6 +43,9 @@ desktop = [
     "fastapi>=0.110",
     "python-dotenv>=1.0",
     "uvicorn[standard]>=0.27",
+    # /api/chat/upload in prash/server.py accepts multipart form data; FastAPI
+    # raises at import time without this (found on a clean git-clone install).
+    "python-multipart>=0.0.9",
 ]
 # dev pulls desktop because the test suite imports the desktop-server modules at
 # collection time (tests/test_desktop_api.py, test_connector_registry.py,

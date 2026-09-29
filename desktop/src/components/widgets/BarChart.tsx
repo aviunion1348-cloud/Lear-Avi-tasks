@@ -23,7 +23,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   data = [],
   label,
   unit = '',
-  color = '#FF3A89',
+  color = '#e8b44a',
   height = 170,
   onExpand,
 }) => {
@@ -231,7 +231,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                   y={chartBaseY + 16}
                   textAnchor="middle"
                   fontSize="10"
-                  fill={isHovered ? '#FF3A89' : 'rgba(255,255,255,0.5)'}
+                  fill={isHovered ? '#e8b44a' : 'rgba(255,255,255,0.5)'}
                   fontWeight={isHovered ? '600' : '400'}
                   className="transition-colors select-none"
                 >

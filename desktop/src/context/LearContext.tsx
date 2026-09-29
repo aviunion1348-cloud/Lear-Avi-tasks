@@ -156,7 +156,12 @@ export const LearProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const resConn = await fetch('/api/connectors');
       if (resConn.ok) {
         const cData = await resConn.json();
-        const configured = (cData.connectors || []).filter((c: any) => c.configured);
+        // Fixed (audit issue #1): the registry serializes `status: 'configured' |
+        // 'unconfigured'` — there is no boolean `configured` field, so the
+        // context-level count previously stayed 0 even with live integrations.
+        const configured = (cData.connectors || []).filter(
+          (c: any) => c.status === 'configured' || c.configured === true
+        );
         setConnectedCount(configured.length);
       }
     } catch (e) {

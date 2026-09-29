@@ -14,6 +14,26 @@ export default defineConfig(async () => ({
     clearMocks: true,
   },
 
+  // Production build: split heavy vendors into their own cacheable chunks so the
+  // first dashboard paint stays fast and animation/motion code never blocks it.
+  build: {
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "motion-vendor": ["framer-motion"],
+          "radix-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-icons",
+          ],
+          "icons-vendor": ["lucide-react"],
+        },
+      },
+    },
+  },
+
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors
@@ -22,7 +42,12 @@ export default defineConfig(async () => ({
   server: {
     port: 1420,
     strictPort: true,
-    host: host || false,
+    // Bind on all interfaces so cloud/live-preview sandboxes work, not just
+    // loopback (Tauri still reaches the same port on localhost).
+    host: host || true,
+    // Accept preview-platform hostnames (e.g. *.e2b.app) — Vite blocks
+    // unknown Host headers by default otherwise.
+    allowedHosts: true,
     hmr: host
       ? {
           protocol: "ws",
@@ -34,7 +59,14 @@ export default defineConfig(async () => ({
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
-      }
+      },
+      // The frontend now opens relative WebSockets (same-origin /ws/events);
+      // forward them to the FastAPI bridge during development.
+      '/ws': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        ws: true,
+      },
     },
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`

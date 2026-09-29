@@ -19,6 +19,7 @@ import os
 import smtplib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from .service_urls import api_url, chat_deeplink
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ def generate_incident_email_html(
     cluster: str = "AWS EKS lear-demo (ap-south-1 Mumbai)",
     downtime_seconds: int = 14,
     incident_id: Optional[str] = None,
-    base_url: str = "http://localhost:8000",
+    base_url: str | None = None,
     **kwargs: Any,
 ) -> str:
     """Generates an executive-grade, interactive dark-obsidian responsive HTML email."""
@@ -51,7 +52,7 @@ def generate_incident_email_html(
     status_icon = "🟢" if is_recovered else "🚨"
 
     inc_id = incident_id or f"INC-{int(datetime.datetime.now(datetime.timezone.utc).timestamp())}"
-    chat_url = f"http://localhost:1420/?tab=chat&session={inc_id}"
+    chat_url = chat_deeplink(inc_id)
     approve_url = f"{base_url}/api/incident/{inc_id}/approve"
     deny_url = f"{base_url}/api/incident/{inc_id}/deny"
 
@@ -334,7 +335,7 @@ def dispatch_email_alert(
     to_email: Optional[str] = None,
     downtime_seconds: int = 14,
     incident_id: Optional[str] = None,
-    base_url: str = "http://localhost:8000",
+    base_url: str | None = None,
     **kwargs: Any,
 ) -> Dict[str, Any]:
     """Generates the HTML email, archives it for preview, and dispatches via SMTP directly to the recipient."""
@@ -348,7 +349,7 @@ def dispatch_email_alert(
                 creds.setdefault(k.strip(), v.strip().strip("'").strip('"'))
 
     inc_id = incident_id or f"INC-{int(datetime.datetime.now(datetime.timezone.utc).timestamp())}"
-    chat_url = f"http://localhost:1420/?tab=chat&session={inc_id}"
+    chat_url = chat_deeplink(inc_id)
 
     html_body = generate_incident_email_html(
         title=subject,
@@ -448,7 +449,7 @@ def generate_copilot_chat_email_html(
     service: str = "checkout-api",
     status: str = "ACTIVE",
     action: Optional[str] = None,
-    base_url: str = "http://localhost:8000",
+    base_url: str | None = None,
 ) -> str:
     """Generates an executive-grade conversational response email from Lear Copilot."""
     now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -457,7 +458,7 @@ def generate_copilot_chat_email_html(
     status_badge = "RECOVERED" if is_resolved else "INCIDENT ACTIVE"
     status_color = "#10B981" if is_resolved else "#EF4444"
 
-    chat_url = f"http://localhost:1420/?tab=chat&session={incident_id}"
+    chat_url = chat_deeplink(incident_id)
     approve_url = f"{base_url}/api/incident/{incident_id}/approve"
     deny_url = f"{base_url}/api/incident/{incident_id}/deny"
 
@@ -571,7 +572,7 @@ def dispatch_copilot_email_reply(
     service: str = "checkout-api",
     status: str = "ACTIVE",
     action: Optional[str] = None,
-    base_url: str = "http://localhost:8000",
+    base_url: str | None = None,
 ) -> Dict[str, Any]:
     """Dispatches a conversational email reply via Gmail SMTP directly to the recipient."""
     creds = {}

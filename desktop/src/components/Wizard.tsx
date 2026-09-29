@@ -1,6 +1,9 @@
 import { useCallback, useState, useEffect } from 'react';
 import { Cloud, GitBranch, Activity, Shield, Layers, CheckCircle2, Loader2, ArrowRight, Sparkles } from 'lucide-react';
 import ConnectorForm, { type AuthField } from './ConnectorForm';
+import { sfx, sfxFor } from '../lib/soundEngine';
+import './Wizard.css';
+import './WizardMotion.css';
 
 interface Connector {
   id: string;
@@ -11,6 +14,19 @@ interface Connector {
   description: string;
   status: 'configured' | 'unconfigured';
   auth_fields: AuthField[];
+}
+
+/* The service dots used each vendor's brand colour, which put Azure blue,
+   GCP blue and Kubernetes blue back into a console that is deliberately gold
+   and black. They still need to be distinguishable from one another, so this
+   maps each connector onto a fixed step of the gold ramp rather than flattening
+   them all to one colour - configured services get the brightest step. */
+const GOLD_RAMP = ['#e8b44a', '#f2cd7c', '#c9a227', '#f7e7c3', '#a97722', '#d8a441'];
+function goldDot(id: string, configured: boolean): string {
+  if (configured) return '#f7e7c3';
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return GOLD_RAMP[Math.abs(h) % GOLD_RAMP.length];
 }
 
 const CATEGORY_META: Record<string, { label: string; icon: any }> = {
@@ -75,20 +91,23 @@ export default function Wizard({ onComplete }: { onComplete: (config?: any) => v
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-white flex items-center justify-center">
+      <div className="min-h-screen text-white flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-white flex flex-col items-center py-12 px-8 relative overflow-y-auto">
+    <div className="min-h-screen text-white flex flex-col items-center py-12 px-8 relative overflow-y-auto wizard-stage">
+      {/* Gold scan rail — the stage's one piece of standing motion */}
+      <span className="wizard-rail" aria-hidden="true" />
+
       {/* Background Ambience */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-accent/10 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-cyan-500/10 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-amber-500/10 blur-[140px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-5xl relative z-10">
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 wizard-intro">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-semibold mb-3">
             <Sparkles size={14} /> LEAR INTELLIGENCE PLATFORM
           </div>
@@ -101,23 +120,27 @@ export default function Wizard({ onComplete }: { onComplete: (config?: any) => v
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Category & Connector Selection */}
           <div className="w-full lg:w-72 shrink-0 space-y-4">
-            <div className="glass-panel rounded-xl p-2 space-y-1">
+            <div data-sub-block className="glass-panel rounded-xl p-2 space-y-1">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-3 py-1.5 block">
                 Categories
               </span>
-              {categories.map(cat => {
+              {categories.map((cat, ci) => {
                 const meta = CATEGORY_META[cat] || { label: cat, icon: Cloud };
                 const Icon = meta.icon;
                 const isCatActive = activeCategory === cat;
                 return (
                   <button
                     key={cat}
+                    data-active={isCatActive}
+                    style={{ ['--wz-delay' as string]: `${Math.min(ci, 8) * 30}ms` }}
+                    onMouseEnter={() => sfxFor('ui.hover', cat, { minGapMs: 70 })}
                     onClick={() => {
+                      sfx('ui.select.01');
                       setActiveCategory(cat);
                       const firstInCat = connectors.find(c => c.category === cat);
                       if (firstInCat) setSelectedConnectorId(firstInCat.id);
                     }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    className={`wz-cat w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                       isCatActive
                         ? 'bg-accent/15 text-accent border border-accent/25'
                         : 'text-gray-400 hover:text-white hover:bg-surface'
@@ -131,26 +154,33 @@ export default function Wizard({ onComplete }: { onComplete: (config?: any) => v
             </div>
 
             {/* Connectors in Category */}
-            <div className="glass-panel rounded-xl p-2 space-y-1">
+            <div data-sub-block className="glass-panel rounded-xl p-2 space-y-1">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-3 py-1.5 block">
                 Services
               </span>
               {connectors
                 .filter(c => c.category === activeCategory)
-                .map(c => {
+                .map((c, si) => {
                   const isSelected = selectedConnectorId === c.id;
                   return (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedConnectorId(c.id)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      data-active={isSelected}
+                      style={{ ['--wz-delay' as string]: `${Math.min(si, 8) * 30}ms` }}
+                      onMouseEnter={() => sfxFor('ui.hover', c.id, { minGapMs: 70 })}
+                      onClick={() => { sfx('nav.tab.01'); setSelectedConnectorId(c.id); }}
+                      className={`wz-svc w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         isSelected
                           ? 'bg-surface-elevated text-white border border-border-hover'
                           : 'text-gray-400 hover:text-white hover:bg-surface'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
+                        <span
+                          className="wz-dot w-2 h-2 rounded-full"
+                          data-live={c.status === 'configured'}
+                          style={{ backgroundColor: goldDot(c.id, c.status === 'configured') }}
+                        />
                         <span>{c.name}</span>
                       </div>
                       {c.status === 'configured' && (
@@ -163,46 +193,23 @@ export default function Wizard({ onComplete }: { onComplete: (config?: any) => v
           </div>
 
           {/* Dynamic Form Area */}
-          <div className="flex-1 glass-card rounded-2xl p-8 flex flex-col justify-between">
+          <div className="flex-1 flex flex-col justify-between min-w-0">
             {selectedConnector ? (
               <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="p-3 rounded-xl border border-white/10"
-                      style={{ backgroundColor: `${selectedConnector.color}20` }}
-                    >
-                      <Cloud size={24} style={{ color: selectedConnector.color }} />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white">{selectedConnector.name}</h2>
-                      <p className="text-xs text-gray-400">{selectedConnector.description}</p>
-                    </div>
-                  </div>
-                  <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                      selectedConnector.status === 'configured'
-                        ? 'bg-accent/15 text-accent border border-accent/30'
-                        : 'bg-surface text-gray-400 border border-border-subtle'
-                    }`}
-                  >
-                    {selectedConnector.status === 'configured' ? '● Configured' : '○ Not Configured'}
-                  </span>
-                </div>
-
                 <ConnectorForm
+                  key={selectedConnector.id}
                   connector={selectedConnector}
                   onSuccess={handleConnectorConnected}
                   onDisconnect={handleConnectorDisconnected}
                 />
               </div>
             ) : (
-              <div className="flex items-center justify-center py-20 text-gray-500">
+              <div className="glass-card rounded-2xl flex items-center justify-center py-20 text-gray-500">
                 Select a service to configure credentials
               </div>
             )}
 
-            <div className="flex justify-end pt-6 border-t border-border-subtle mt-8">
+            <div className="flex justify-end pt-6 mt-8">
               <button
                 onClick={handleFinish}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-surface hover:bg-surface-elevated border border-border-subtle hover:border-accent/40 text-xs font-semibold text-white transition-all cursor-pointer"

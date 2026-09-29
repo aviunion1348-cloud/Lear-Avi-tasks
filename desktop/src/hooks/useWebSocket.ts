@@ -14,7 +14,25 @@ export interface WebSocketEvent {
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected';
 
-export function useWebSocket(url: string = 'ws://127.0.0.1:8000/ws/events') {
+/**
+ * Resolve the events socket URL for the current runtime (fixed from the
+ * hardcoded ws://127.0.0.1:8000 — audit issue #6):
+ *   - page served over http(s)  → same-host relative path (Vite proxies /ws
+ *     to the FastAPI backend in dev; a reverse proxy fronts it in previews)
+ *   - Tauri production shell (tauri:// or file://) → local backend on 127.0.0.1
+ * Override with VITE_WS_URL when the socket lives somewhere else.
+ */
+export function resolveWebSocketUrl(): string {
+  const override = import.meta.env?.VITE_WS_URL as string | undefined;
+  if (override && override.length > 0) return override;
+  if (typeof window !== 'undefined' && /^https?:$/.test(window.location.protocol)) {
+    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    return `${proto}://${window.location.host}/ws/events`;
+  }
+  return 'ws://127.0.0.1:8000/ws/events';
+}
+
+export function useWebSocket(url: string = resolveWebSocketUrl()) {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
   const [lastEvent, setLastEvent] = useState<WebSocketEvent | null>(null);

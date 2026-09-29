@@ -14,6 +14,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from typing import Any, Dict, Optional
+from .service_urls import api_url, chat_deeplink
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def dispatch_slack_alert(
     diagnosis: str = "",
     action_taken: str = "",
     incident_id: Optional[str] = None,
-    base_url: str = "http://localhost:8000",
+    base_url: str | None = None,
     webhook_url: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Dispatches an incident alert to Slack via incoming webhook if configured."""
@@ -45,7 +46,7 @@ def dispatch_slack_alert(
         return {"sent": False, "reason": "SLACK_WEBHOOK_URL not configured in environment or .env"}
 
     inc_id = incident_id or "INC-LIVE"
-    chat_url = f"http://localhost:1420/?tab=chat&session={inc_id}"
+    chat_url = chat_deeplink(inc_id)
     approve_url = f"{base_url}/api/incident/{inc_id}/approve"
     deny_url = f"{base_url}/api/incident/{inc_id}/deny"
 
@@ -150,7 +151,7 @@ def dispatch_slack_chat_response(
     service: str = "checkout-api",
     status: str = "ACTIVE",
     action: Optional[str] = None,
-    base_url: str = "http://localhost:8000",
+    base_url: str | None = None,
     webhook_url: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Posts an interactive conversational response from Lear Copilot into Slack."""
@@ -168,7 +169,7 @@ def dispatch_slack_chat_response(
         return {"sent": False, "reason": "SLACK_WEBHOOK_URL not configured"}
 
     inc_id = incident_id or "INC-GENERAL"
-    chat_url = f"http://localhost:1420/?tab=chat&session={inc_id}"
+    chat_url = chat_deeplink(inc_id)
     approve_url = f"{base_url}/api/incident/{inc_id}/approve"
     deny_url = f"{base_url}/api/incident/{inc_id}/deny"
 

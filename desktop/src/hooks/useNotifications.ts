@@ -65,6 +65,8 @@ export function useNotifications() {
 
     setNotifications(prev => [newNotif, ...prev.slice(0, 99)]);
     setToasts(prev => [newNotif, ...prev.slice(0, 4)]);
+    // Route to the sound engine (severity-mapped chime, throttled by the engine)
+    window.dispatchEvent(new CustomEvent('lear:toast', { detail: { severity: sev } }));
   }, [lastEvent]);
 
   const dismissToast = useCallback((id: string) => {
@@ -88,6 +90,7 @@ export function useNotifications() {
       read: false,
     };
     setToasts(prev => [newToast, ...prev.slice(0, 4)]);
+    window.dispatchEvent(new CustomEvent('lear:toast', { detail: { severity: newToast.severity } }));
   }, []);
 
   const markAsRead = useCallback(async (id: string) => {

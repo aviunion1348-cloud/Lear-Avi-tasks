@@ -6,8 +6,16 @@ episodic memory reasoning, and resolution dialogues are routed directly to the
 Lear Desktop Dashboard.
 """
 
+from .service_urls import desktop_url
+
+
 def generate_admin_chaos_html() -> str:
-    return """<!DOCTYPE html>
+    # The page body is a plain (non-f) string because it is full of CSS braces;
+    # cross-service URLs are injected afterwards via placeholder substitution.
+    return _ADMIN_HTML.replace("__DESKTOP_URL__", desktop_url())
+
+
+_ADMIN_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -471,7 +479,7 @@ def generate_admin_chaos_html() -> str:
         <span>🛒</span>
         <span>View Customer Storefront</span>
       </a>
-      <a href="http://localhost:1420" target="_blank" class="nav-btn primary">
+      <a href="__DESKTOP_URL__" target="_blank" class="nav-btn primary">
         <span>⚡</span>
         <span>Lear Mission Control Dashboard</span>
       </a>

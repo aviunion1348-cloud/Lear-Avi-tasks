@@ -401,7 +401,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
         const matched = metrics.find(m => (m.name || '').toLowerCase().includes(k.toLowerCase()));
         const val = matched && typeof matched.value === 'number' ? matched.value : 0;
 
-        let color = '#FF3A89';
+        let color = '#e8b44a';
         if (cleanKey.includes('crit') || cleanKey.includes('high')) color = '#F43F5E';
         else if (cleanKey.includes('med') || cleanKey.includes('warn')) color = '#F59E0B';
         else if (cleanKey.includes('low') || cleanKey.includes('info')) color = '#38BDF8';
@@ -433,7 +433,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
           label: barLabel.length > 12 ? `${barLabel.slice(0, 10)}…` : barLabel,
           value: val,
           unit: m.unit || defaultUnit,
-          color: idx % 2 === 0 ? '#FF3A89' : '#A855F7',
+          color: idx % 2 === 0 ? '#e8b44a' : '#A855F7',
         });
       });
       return items;
@@ -451,7 +451,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
           label: timeStr,
           value: p.value,
           unit: defaultUnit,
-          color: '#FF3A89',
+          color: '#e8b44a',
         });
       });
     }
@@ -568,9 +568,9 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
         <div className="flex items-center gap-3">
           <div
             className="p-3 rounded-xl border border-white/10"
-            style={{ backgroundColor: `${connectorInfo?.color || '#FF3A89'}20` }}
+            style={{ backgroundColor: `${connectorInfo?.color || '#e8b44a'}20` }}
           >
-            <Cloud size={24} style={{ color: connectorInfo?.color || '#FF3A89' }} />
+            <Cloud size={24} style={{ color: connectorInfo?.color || '#e8b44a' }} />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -701,7 +701,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
             <div
               className={`w-2 h-2 rounded-full ${
                 status === 'healthy' || status === 'running' || status === 'stable'
-                  ? 'bg-accent shadow-[0_0_6px_rgba(255,58,137,0.5)]'
+                  ? 'bg-accent shadow-[0_0_6px_rgba(232, 180, 74,0.5)]'
                   : status === 'unconfigured'
                   ? 'bg-amber-400'
                   : 'bg-rose-500'
@@ -927,7 +927,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
                       data={chartData}
                       label={widgetLabel}
                       unit={unit}
-                      color={connectorInfo?.color || '#FF3A89'}
+                      color={connectorInfo?.color || '#e8b44a'}
                       onExpand={() =>
                         setExpandedWidget({
                           type: 'line_chart',
@@ -959,7 +959,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
                       data={barData}
                       label={widgetLabel}
                       unit={unit}
-                      color={connectorInfo?.color || '#FF3A89'}
+                      color={connectorInfo?.color || '#e8b44a'}
                       onExpand={() =>
                         setExpandedWidget({
                           type: 'bar_chart',
@@ -1088,7 +1088,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
                     data={expandedWidget.data}
                     label={expandedWidget.title}
                     unit={expandedWidget.unit}
-                    color={connectorInfo?.color || '#FF3A89'}
+                    color={connectorInfo?.color || '#e8b44a'}
                     height={280}
                   />
                 ) : (
@@ -1096,7 +1096,7 @@ export const ServiceWidget: React.FC<ServiceWidgetProps> = ({
                     data={expandedWidget.data}
                     label={expandedWidget.title}
                     unit={expandedWidget.unit}
-                    color={connectorInfo?.color || '#FF3A89'}
+                    color={connectorInfo?.color || '#e8b44a'}
                     height={280}
                   />
                 )}
